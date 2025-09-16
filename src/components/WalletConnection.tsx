@@ -6,6 +6,7 @@ import { getAccountUrl } from '@/services/algorand';
 import { Wallet, ExternalLink, LogOut, ChevronDown } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import toast from 'react-hot-toast';
+import ConnectWalletButton from '@/components/ConnectWalletButton';
 
 interface WalletConnectionProps {
   onAccountChange: (accounts: string[]) => void;
@@ -109,19 +110,26 @@ const WalletConnection = ({ onAccountChange }: WalletConnectionProps) => {
 
   if (availableWallets.length === 0) {
     return (
-      <Card className="p-4 border-warning bg-warning/10">
-        <p className="text-center text-sm">
-          No supported wallets found. Please install{' '}
-          <a 
-            href="https://chromewebstore.google.com/detail/lute/kiaoohollfkjhikdifohdckeidckokjh" 
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:underline font-medium"
-          >
-            Lute Wallet
-          </a>{' '}
-          or another Algorand wallet.
-        </p>
+      <Card className="p-8 bg-card/30 backdrop-blur-md border border-primary/20 shadow-campaign rounded-xl">
+        <div className="w-full flex flex-col items-center justify-center text-center gap-5">
+          <p className="text-base font-semibold">No supported wallets found</p>
+          <div className="flex items-center gap-3">
+            <ConnectWalletButton />
+            <Button 
+              className="bg-gradient-primary hover:opacity-90 shadow-fund"
+              asChild
+            >
+              <a 
+                href="https://chromewebstore.google.com/detail/lute/kiaoohollfkjhikdifohdckeidckokjh" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                Install Lute
+              </a>
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground">Install a wallet to connect and start using AlgoFund</p>
+        </div>
       </Card>
     );
   }
