@@ -8,7 +8,7 @@ import FundingModal from '@/components/FundingModal';
 import { Campaign } from '@/services/algorand';
 import { useCampaignStore } from '@/store/CampaignStore';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
-import { Coins, TrendingUp, Users, Target } from 'lucide-react';
+import { Coins, TrendingUp, Users, Target, Shield, Zap, Globe, Lock, Award, Heart } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import DonateButton from '@/components/DonateButton';
 
@@ -151,6 +151,80 @@ const Index = () => {
               />
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Why Choose AlgoFund */}
+      <section className="py-16 bg-gradient-to-br from-primary/5 to-accent/5">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Why Choose AlgoFund</h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Experience the future of crowdfunding with Algorand's cutting-edge blockchain technology
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="text-center group border rounded-xl p-6 bg-card shadow-campaign hover:shadow-fund transition-shadow">
+              <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Shield className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Blockchain Security</h3>
+              <p className="text-muted-foreground">
+                Your funds are protected by Algorand's secure blockchain with cryptographic guarantees
+              </p>
+            </div>
+
+            <div className="text-center group border rounded-xl p-6 bg-card shadow-campaign hover:shadow-fund transition-shadow">
+              <div className="w-16 h-16 bg-gradient-success rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Zap className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Instant Transactions</h3>
+              <p className="text-muted-foreground">
+                Donations are processed instantly with finality in under 4 seconds
+              </p>
+            </div>
+
+            <div className="text-center group border rounded-xl p-6 bg-card shadow-campaign hover:shadow-fund transition-shadow">
+              <div className="w-16 h-16 bg-gradient-fund rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Globe className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Global Access</h3>
+              <p className="text-muted-foreground">
+                Support campaigns worldwide with borderless, permissionless transactions
+              </p>
+            </div>
+
+            <div className="text-center group border rounded-xl p-6 bg-card shadow-campaign hover:shadow-fund transition-shadow">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Lock className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Transparent Funding</h3>
+              <p className="text-muted-foreground">
+                All transactions are publicly verifiable on the Algorand blockchain
+              </p>
+            </div>
+
+            <div className="text-center group border rounded-xl p-6 bg-card shadow-campaign hover:shadow-fund transition-shadow">
+              <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Award className="h-8 w-8 text-accent" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Low Fees</h3>
+              <p className="text-muted-foreground">
+                Minimal transaction costs mean more of your donation goes to the cause
+              </p>
+            </div>
+
+            <div className="text-center group border rounded-xl p-6 bg-card shadow-campaign hover:shadow-fund transition-shadow">
+              <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Heart className="h-8 w-8 text-success" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Community Impact</h3>
+              <p className="text-muted-foreground">
+                Join a community of changemakers building a better future together
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
