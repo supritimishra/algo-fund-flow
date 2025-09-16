@@ -51,18 +51,8 @@ const WalletConnection = ({ onAccountChange }: WalletConnectionProps) => {
   };
 
   const getWalletIcon = (walletId: string) => {
-    switch (walletId) {
-      case 'lute':
-        return '🎵'; // Lute icon
-      case 'pera':
-        return '🍐'; // Pera icon
-      case 'defly':
-        return '🦋'; // Defly icon
-      case 'exodus':
-        return '📱'; // Exodus icon
-      default:
-        return '👛'; // Generic wallet icon
-    }
+    // Emoji icons removed; UI uses lucide Wallet icon instead
+    return '';
   };
 
   if (activeWallet && connectedAccounts.length > 0) {
@@ -70,7 +60,7 @@ const WalletConnection = ({ onAccountChange }: WalletConnectionProps) => {
       <Card className="p-2 bg-gradient-primary text-white shadow-campaign">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-sm">{getWalletIcon(activeWallet.id)}</span>
+            <Wallet className="h-4 w-4" />
             <div>
               <p className="text-xs flex items-center gap-1">
                 {activeWallet.metadata.name}
@@ -137,7 +127,7 @@ const WalletConnection = ({ onAccountChange }: WalletConnectionProps) => {
           className="bg-gradient-primary hover:opacity-90 shadow-fund"
           onClick={() => handleConnect('lute')}
         >
-          <span className="mr-2 text-lg">🎵</span>
+          <Wallet className="mr-2 h-4 w-4" />
           Connect Lute Wallet
         </Button>
       ) : (

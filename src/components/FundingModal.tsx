@@ -39,14 +39,22 @@ const FundingModal = ({ campaign, isOpen, onClose }: FundingModalProps) => {
     setIsFunding(true);
     try {
       const txId = await fundCampaign(campaign.id, fundAmount, activeWallet);
-      
-      toast.success(`Transaction submitted successfully! TxID: ${txId.slice(0, 8)}...`);
+
+      toast.success(
+        `Transaction confirmed. View on explorer`,
+        {
+          id: 'tx-success',
+        }
+      );
+      // Optional: open explorer in new tab
+      window.open(getTransactionUrl(txId), '_blank');
       
       setAmount('');
       onClose();
     } catch (error: any) {
       console.error('Funding error:', error);
-      toast.error(`Transaction failed: ${error.message}`);
+      const message = error?.message || 'Transaction failed. Please try again.';
+      toast.error(message);
     } finally {
       setIsFunding(false);
     }

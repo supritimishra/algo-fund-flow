@@ -9,6 +9,7 @@ import CampaignForm, { CampaignFormValues } from '@/components/campaign/Campaign
 import DonationSection from '@/components/campaign/DonationSection';
 import Leaderboard, { Donor } from '@/components/campaign/Leaderboard';
 import { useCampaignStore } from '@/store/CampaignStore';
+import { createCampaignContract, getTransactionUrl } from '@/services/algorand';
 
 const Create = () => {
   const { activeWallet } = useWallet();
@@ -20,6 +21,10 @@ const Create = () => {
   const isConnected = !!activeWallet;
 
   const onSubmit = async (values: CampaignFormValues) => {
+    if (!activeWallet || !activeWallet.accounts?.length) {
+      toast.error('Please connect your wallet before creating a campaign');
+      return;
+    }
     setCreating(true);
     try {
       const id = Date.now().toString();
@@ -36,9 +41,18 @@ const Create = () => {
         imageUrl: values.imageUrl || undefined,
         donors: [],
       };
+      // Trigger wallet popup and on-chain tx during creation
+      const { txId, appId } = await createCampaignContract(newCampaign as any, activeWallet);
+      if (appId) {
+        (newCampaign as any).appId = appId;
+      }
+      (newCampaign as any).txId = txId;
+
       addCampaign(newCampaign);
-      toast.success('Campaign created!');
-      navigate(`/campaign/${id}`);
+      toast.success('Campaign created and transaction confirmed. Opening explorer...');
+      try { window.open(getTransactionUrl(txId), '_blank'); } catch (_) {}
+      // Navigate to home so the newly created campaign is visible in the list
+      navigate('/');
     } catch (err) {
       toast.error('Failed to create campaign');
       console.error(err);

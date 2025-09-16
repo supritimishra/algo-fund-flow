@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@txnlab/use-wallet-react';
@@ -11,8 +11,13 @@ const CampaignPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { activeWallet } = useWallet();
+  const location = useLocation();
   const { getCampaign, addDonation } = useCampaignStore();
-  const campaign = useMemo(() => (id ? getCampaign(id) : undefined), [id, getCampaign]);
+  const campaignFromState = (location.state as any)?.campaign;
+  const campaign = useMemo(() => {
+    if (campaignFromState && campaignFromState.id === id) return campaignFromState;
+    return id ? getCampaign(id) : undefined;
+  }, [id, getCampaign, campaignFromState]);
 
   if (!campaign) {
     return (
