@@ -228,6 +228,51 @@ const Index = () => {
         </div>
       </section>
 
+      {/* What Our Users Say */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">What Our Users Say</h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Stories from creators and donors who use AlgoFund every day
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="border rounded-xl p-6 bg-card shadow-campaign">
+              <p className="italic mb-4">“Funding our clean-water project was seamless. Fees were tiny and our supporters loved the instant confirmations.”</p>
+              <div className="flex items-center justify-between">
+                <div className="text-sm">
+                  <p className="font-semibold">Aarav S.</p>
+                  <p className="text-muted-foreground">Creator • Community Wells</p>
+                </div>
+                <span className="text-xs bg-success/10 text-success px-2 py-1 rounded-full">Raised 12,500 ALGO</span>
+              </div>
+            </div>
+            <div className="border rounded-xl p-6 bg-card shadow-campaign">
+              <p className="italic mb-4">“I can see where my donation goes on chain. The transparency gives me confidence to support more causes.”</p>
+              <div className="flex items-center justify-between">
+                <div className="text-sm">
+                  <p className="font-semibold">Meera T.</p>
+                  <p className="text-muted-foreground">Donor • Verified</p>
+                </div>
+                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">Top Donor</span>
+              </div>
+            </div>
+            <div className="border rounded-xl p-6 bg-card shadow-campaign">
+              <p className="italic mb-4">“Launching on AlgoFund took minutes. Instant payouts and global reach helped us hit our goal quickly.”</p>
+              <div className="flex items-center justify-between">
+                <div className="text-sm">
+                  <p className="font-semibold">Luis R.</p>
+                  <p className="text-muted-foreground">Creator • Open Education</p>
+                </div>
+                <span className="text-xs bg-accent/10 text-accent px-2 py-1 rounded-full">100% Funded</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Connect Wallet CTA */}
       {!isConnected && (
         <section className="py-12 bg-gradient-primary/5">
