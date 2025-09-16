@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import CampaignForm, { CampaignFormValues } from '@/components/campaign/CampaignForm';
-import DonationSection from '@/components/campaign/DonationSection';
 import Leaderboard, { Donor } from '@/components/campaign/Leaderboard';
 import { useCampaignStore } from '@/store/CampaignStore';
 import { createCampaignContract, getTransactionUrl } from '@/services/algorand';
@@ -88,7 +87,6 @@ const Create = () => {
           </div>
 
           <div className="space-y-6">
-            <DonationSection onDonate={handleDonate} disabled={!isConnected} />
             <Leaderboard donors={donors} />
           </div>
         </div>

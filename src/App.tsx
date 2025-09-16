@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import Create from "./pages/Create";
 import { CampaignStoreProvider } from '@/store/CampaignStore';
 import CampaignPage from './pages/Campaign';
+import DonatePage from './pages/Donate';
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/create" element={<Create />} />
+              <Route path="/donate" element={<DonatePage />} />
               <Route path="/campaign/:id" element={<CampaignPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

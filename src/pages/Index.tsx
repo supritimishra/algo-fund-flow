@@ -8,9 +8,9 @@ import FundingModal from '@/components/FundingModal';
 import { Campaign } from '@/services/algorand';
 import { useCampaignStore } from '@/store/CampaignStore';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
-import { Campaign, mockCampaigns } from '@/services/algorand';
-import { Coins, TrendingUp, Users, Target } from 'lucide-react';
+import { Coins, TrendingUp, Users, Target, Shield, Zap, Globe, Lock, Award, Heart } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
+import DonateButton from '@/components/DonateButton';
 
 const Index = () => {
   const { activeWallet } = useWallet();
@@ -63,6 +63,7 @@ const Index = () => {
             
             <div className="flex items-center gap-2">
               <ThemeToggle />
+              <DonateButton />
               <CreateCampaign 
                 isConnected={isConnected}
                 onCampaignCreate={handleCreateCampaign}
@@ -153,6 +154,125 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Why Choose AlgoFund */}
+      <section className="py-16 bg-gradient-to-br from-primary/5 to-accent/5">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Why Choose AlgoFund</h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Experience the future of crowdfunding with Algorand's cutting-edge blockchain technology
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="text-center group border rounded-xl p-6 bg-card shadow-campaign hover:shadow-fund transition-shadow">
+              <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Shield className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Blockchain Security</h3>
+              <p className="text-muted-foreground">
+                Your funds are protected by Algorand's secure blockchain with cryptographic guarantees
+              </p>
+            </div>
+
+            <div className="text-center group border rounded-xl p-6 bg-card shadow-campaign hover:shadow-fund transition-shadow">
+              <div className="w-16 h-16 bg-gradient-success rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Zap className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Instant Transactions</h3>
+              <p className="text-muted-foreground">
+                Donations are processed instantly with finality in under 4 seconds
+              </p>
+            </div>
+
+            <div className="text-center group border rounded-xl p-6 bg-card shadow-campaign hover:shadow-fund transition-shadow">
+              <div className="w-16 h-16 bg-gradient-fund rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Globe className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Global Access</h3>
+              <p className="text-muted-foreground">
+                Support campaigns worldwide with borderless, permissionless transactions
+              </p>
+            </div>
+
+            <div className="text-center group border rounded-xl p-6 bg-card shadow-campaign hover:shadow-fund transition-shadow">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Lock className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Transparent Funding</h3>
+              <p className="text-muted-foreground">
+                All transactions are publicly verifiable on the Algorand blockchain
+              </p>
+            </div>
+
+            <div className="text-center group border rounded-xl p-6 bg-card shadow-campaign hover:shadow-fund transition-shadow">
+              <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Award className="h-8 w-8 text-accent" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Low Fees</h3>
+              <p className="text-muted-foreground">
+                Minimal transaction costs mean more of your donation goes to the cause
+              </p>
+            </div>
+
+            <div className="text-center group border rounded-xl p-6 bg-card shadow-campaign hover:shadow-fund transition-shadow">
+              <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Heart className="h-8 w-8 text-success" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Community Impact</h3>
+              <p className="text-muted-foreground">
+                Join a community of changemakers building a better future together
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* What Our Users Say */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">What Our Users Say</h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Stories from creators and donors who use AlgoFund every day
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="border rounded-xl p-6 bg-card shadow-campaign">
+              <p className="italic mb-4">“Funding our clean-water project was seamless. Fees were tiny and our supporters loved the instant confirmations.”</p>
+              <div className="flex items-center justify-between">
+                <div className="text-sm">
+                  <p className="font-semibold">Aarav S.</p>
+                  <p className="text-muted-foreground">Creator • Community Wells</p>
+                </div>
+                <span className="text-xs bg-success/10 text-success px-2 py-1 rounded-full">Raised 12,500 ALGO</span>
+              </div>
+            </div>
+            <div className="border rounded-xl p-6 bg-card shadow-campaign">
+              <p className="italic mb-4">“I can see where my donation goes on chain. The transparency gives me confidence to support more causes.”</p>
+              <div className="flex items-center justify-between">
+                <div className="text-sm">
+                  <p className="font-semibold">Meera T.</p>
+                  <p className="text-muted-foreground">Donor • Verified</p>
+                </div>
+                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">Top Donor</span>
+              </div>
+            </div>
+            <div className="border rounded-xl p-6 bg-card shadow-campaign">
+              <p className="italic mb-4">“Launching on AlgoFund took minutes. Instant payouts and global reach helped us hit our goal quickly.”</p>
+              <div className="flex items-center justify-between">
+                <div className="text-sm">
+                  <p className="font-semibold">Luis R.</p>
+                  <p className="text-muted-foreground">Creator • Open Education</p>
+                </div>
+                <span className="text-xs bg-accent/10 text-accent px-2 py-1 rounded-full">100% Funded</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Connect Wallet CTA */}
       {!isConnected && (
         <section className="py-12 bg-gradient-primary/5">
@@ -167,19 +287,52 @@ const Index = () => {
       )}
 
       {/* Footer */}
-      <footer className="border-t py-8 mt-12">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-muted-foreground">
-            Built on Algorand • View transactions on{' '}
-            <a 
-              href="https://testnet.algoexplorer.io" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              Algorand Explorer
-            </a>
-          </p>
+      <footer className="border-t py-12 mt-12">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-2 bg-gradient-primary rounded-lg">
+                  <Coins className="h-5 w-5 text-white" />
+                </div>
+                <span className="font-bold">AlgoFund</span>
+              </div>
+              <p className="text-sm text-muted-foreground">Crowdfunding built on Algorand. Fast, secure, and transparent.</p>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-3">Resources</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#" className="text-muted-foreground hover:text-primary">FAQ</a></li>
+                <li><a href="#" className="text-muted-foreground hover:text-primary">Getting Started</a></li>
+                <li><a href="#" className="text-muted-foreground hover:text-primary">Security</a></li>
+                <li><a href="#" className="text-muted-foreground hover:text-primary">Fees</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-3">Company</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#" className="text-muted-foreground hover:text-primary">About</a></li>
+                <li><a href="#" className="text-muted-foreground hover:text-primary">Contact</a></li>
+                <li><a href="#" className="text-muted-foreground hover:text-primary">Careers</a></li>
+                <li><a href="#" className="text-muted-foreground hover:text-primary">Press</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-3">Developers</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="https://testnet.algoexplorer.io" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">Algorand Explorer</a></li>
+                <li><a href="#" className="text-muted-foreground hover:text-primary">API Docs</a></li>
+                <li><a href="#" className="text-muted-foreground hover:text-primary">Changelog</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-8 text-center text-sm text-muted-foreground">
+            © {new Date().getFullYear()} AlgoFund. All rights reserved.
+          </div>
         </div>
       </footer>
 
