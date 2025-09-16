@@ -8,9 +8,9 @@ import FundingModal from '@/components/FundingModal';
 import { Campaign } from '@/services/algorand';
 import { useCampaignStore } from '@/store/CampaignStore';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
-import { Campaign, mockCampaigns } from '@/services/algorand';
 import { Coins, TrendingUp, Users, Target } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
+import DonateButton from '@/components/DonateButton';
 
 const Index = () => {
   const { activeWallet } = useWallet();
@@ -63,6 +63,7 @@ const Index = () => {
             
             <div className="flex items-center gap-2">
               <ThemeToggle />
+              <DonateButton />
               <CreateCampaign 
                 isConnected={isConnected}
                 onCampaignCreate={handleCreateCampaign}
