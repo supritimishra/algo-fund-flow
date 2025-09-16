@@ -1,0 +1,145 @@
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Campaign, fundCampaign, getTransactionUrl } from '@/services/algorand';
+import { Target, ExternalLink, Wallet } from 'lucide-react';
+import toast from 'react-hot-toast';
+
+interface FundingModalProps {
+  campaign: Campaign | null;
+  isOpen: boolean;
+  onClose: () => void;
+  connectedAccount: string;
+}
+
+const FundingModal = ({ campaign, isOpen, onClose, connectedAccount }: FundingModalProps) => {
+  const [amount, setAmount] = useState('');
+  const [isFunding, setIsFunding] = useState(false);
+
+  if (!campaign) return null;
+
+  const handleFund = async () => {
+    const fundAmount = parseFloat(amount);
+    
+    if (!fundAmount || fundAmount <= 0) {
+      toast.error('Please enter a valid amount');
+      return;
+    }
+
+    setIsFunding(true);
+    try {
+      const txId = await fundCampaign(campaign.id, fundAmount, connectedAccount);
+      
+      toast.success(
+        <div className="flex items-center gap-2">
+          <span>Transaction submitted!</span>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => window.open(getTransactionUrl(txId), '_blank')}
+            className="p-0 h-auto"
+          >
+            <ExternalLink className="h-4 w-4" />
+          </Button>
+        </div>
+      );
+      
+      setAmount('');
+      onClose();
+    } catch (error: any) {
+      if (error.message?.includes('cancelled')) {
+        toast.error('Transaction cancelled by user');
+      } else {
+        toast.error('Failed to submit funding transaction');
+      }
+      console.error('Funding error:', error);
+    } finally {
+      setIsFunding(false);
+    }
+  };
+
+  const progressPercentage = (campaign.raisedAmount / campaign.goalAmount) * 100;
+  const remainingAmount = campaign.goalAmount - campaign.raisedAmount;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Target className="h-5 w-5 text-primary" />
+            Fund Campaign
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+            <h4 className="font-semibold">{campaign.title}</h4>
+            <div className="text-sm text-muted-foreground">
+              <p>Goal: {campaign.goalAmount.toLocaleString()} ALGO</p>
+              <p>Raised: {campaign.raisedAmount.toLocaleString()} ALGO ({progressPercentage.toFixed(1)}%)</p>
+              <p>Remaining: {remainingAmount.toLocaleString()} ALGO</p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="fundAmount">Amount to Fund (ALGO)</Label>
+            <Input
+              id="fundAmount"
+              type="number"
+              step="0.01"
+              min="0.01"
+              max={remainingAmount}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0.00"
+              className="text-lg"
+            />
+            <p className="text-xs text-muted-foreground">
+              Minimum: 0.01 ALGO • Maximum: {remainingAmount.toFixed(2)} ALGO
+            </p>
+          </div>
+
+          <div className="bg-gradient-primary/10 rounded-lg p-3">
+            <div className="flex items-center gap-2 text-sm">
+              <Wallet className="h-4 w-4 text-primary" />
+              <span>Connected: {connectedAccount.slice(0, 6)}...{connectedAccount.slice(-4)}</span>
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-4">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleFund}
+              disabled={isFunding || !amount}
+              className="flex-1 bg-gradient-fund hover:opacity-90"
+            >
+              {isFunding ? 'Processing...' : `Fund ${amount || '0'} ALGO`}
+            </Button>
+          </div>
+
+          <p className="text-xs text-muted-foreground text-center">
+            Transaction will be viewable on{' '}
+            <a 
+              href="https://testnet.algoexplorer.io" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              Algorand Explorer
+            </a>
+          </p>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default FundingModal;
