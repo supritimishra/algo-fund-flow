@@ -88,7 +88,7 @@ const CampaignCard = ({ campaign, onFund, isConnected }: CampaignCardProps) => {
       <CardFooter className="flex gap-2">
         <Button
           onClick={() => onFund(campaign)}
-          disabled={!isConnected || !campaign.isActive || isDeadlinePassed}
+          disabled={!campaign.isActive || isDeadlinePassed}
           className="flex-1 bg-gradient-fund hover:opacity-90 shadow-fund"
         >
           <Target className="mr-2 h-4 w-4" />
