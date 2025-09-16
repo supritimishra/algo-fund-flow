@@ -5,12 +5,14 @@ import WalletConnection from '@/components/WalletConnection';
 import CampaignCard from '@/components/CampaignCard';
 import CreateCampaign from '@/components/CreateCampaign';
 import FundingModal from '@/components/FundingModal';
-import { Campaign, mockCampaigns } from '@/services/algorand';
+import { Campaign } from '@/services/algorand';
+import { useCampaignStore } from '@/store/CampaignStore';
 import { Coins, TrendingUp, Users, Target } from 'lucide-react';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const Index = () => {
   const { activeWallet } = useWallet();
-  const [campaigns, setCampaigns] = useState<Campaign[]>(mockCampaigns);
+  const { campaigns } = useCampaignStore();
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [isFundingModalOpen, setIsFundingModalOpen] = useState(false);
 
@@ -31,9 +33,7 @@ const Index = () => {
     setIsFundingModalOpen(true);
   };
 
-  const handleCreateCampaign = (newCampaign: Campaign) => {
-    setCampaigns(prev => [newCampaign, ...prev]);
-  };
+  const handleCreateCampaign = (_newCampaign: Campaign) => {};
 
   return (
     <div className="min-h-screen bg-background">
@@ -59,7 +59,8 @@ const Index = () => {
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
               <CreateCampaign 
                 isConnected={isConnected}
                 onCampaignCreate={handleCreateCampaign}

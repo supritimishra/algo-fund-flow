@@ -7,23 +7,30 @@ import { WalletProvider } from '@txnlab/use-wallet-react';
 import { walletManager } from '@/services/algorand';
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import Create from "./pages/Create";
+import { CampaignStoreProvider } from '@/store/CampaignStore';
+import CampaignPage from './pages/Campaign';
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <WalletProvider manager={walletManager}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <CampaignStoreProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/create" element={<Create />} />
+              <Route path="/campaign/:id" element={<CampaignPage />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </CampaignStoreProvider>
     </WalletProvider>
   </QueryClientProvider>
 );

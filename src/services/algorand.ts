@@ -31,6 +31,8 @@ export interface Campaign {
   isActive: boolean;
   appId?: number;
   txId?: string;
+  imageUrl?: string;
+  donors?: { address: string; amount: number }[];
 }
 
 // Mock data for testing (replace with smart contract later)
