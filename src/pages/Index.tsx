@@ -287,19 +287,52 @@ const Index = () => {
       )}
 
       {/* Footer */}
-      <footer className="border-t py-8 mt-12">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-muted-foreground">
-            Built on Algorand • View transactions on{' '}
-            <a 
-              href="https://testnet.algoexplorer.io" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              Algorand Explorer
-            </a>
-          </p>
+      <footer className="border-t py-12 mt-12">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-2 bg-gradient-primary rounded-lg">
+                  <Coins className="h-5 w-5 text-white" />
+                </div>
+                <span className="font-bold">AlgoFund</span>
+              </div>
+              <p className="text-sm text-muted-foreground">Crowdfunding built on Algorand. Fast, secure, and transparent.</p>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-3">Resources</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#" className="text-muted-foreground hover:text-primary">FAQ</a></li>
+                <li><a href="#" className="text-muted-foreground hover:text-primary">Getting Started</a></li>
+                <li><a href="#" className="text-muted-foreground hover:text-primary">Security</a></li>
+                <li><a href="#" className="text-muted-foreground hover:text-primary">Fees</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-3">Company</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#" className="text-muted-foreground hover:text-primary">About</a></li>
+                <li><a href="#" className="text-muted-foreground hover:text-primary">Contact</a></li>
+                <li><a href="#" className="text-muted-foreground hover:text-primary">Careers</a></li>
+                <li><a href="#" className="text-muted-foreground hover:text-primary">Press</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-3">Developers</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="https://testnet.algoexplorer.io" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">Algorand Explorer</a></li>
+                <li><a href="#" className="text-muted-foreground hover:text-primary">API Docs</a></li>
+                <li><a href="#" className="text-muted-foreground hover:text-primary">Changelog</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-8 text-center text-sm text-muted-foreground">
+            © {new Date().getFullYear()} AlgoFund. All rights reserved.
+          </div>
         </div>
       </footer>
 
