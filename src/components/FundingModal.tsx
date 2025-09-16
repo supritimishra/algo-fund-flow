@@ -40,29 +40,13 @@ const FundingModal = ({ campaign, isOpen, onClose }: FundingModalProps) => {
     try {
       const txId = await fundCampaign(campaign.id, fundAmount, activeWallet);
       
-      toast.success(
-        <div className="flex items-center gap-2">
-          <span>Transaction submitted!</span>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => window.open(getTransactionUrl(txId), '_blank')}
-            className="p-0 h-auto"
-          >
-            <ExternalLink className="h-4 w-4" />
-          </Button>
-        </div>
-      );
+      toast.success(`Transaction submitted successfully! TxID: ${txId.slice(0, 8)}...`);
       
       setAmount('');
       onClose();
     } catch (error: any) {
-      if (error.message?.includes('cancelled')) {
-        toast.error('Transaction cancelled by user');
-      } else {
-        toast.error('Failed to submit funding transaction');
-      }
       console.error('Funding error:', error);
+      toast.error(`Transaction failed: ${error.message}`);
     } finally {
       setIsFunding(false);
     }

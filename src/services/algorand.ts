@@ -78,27 +78,64 @@ export const fundCampaign = async (
       throw new Error('No wallet connected');
     }
 
+    // Ensure we have an account to use
+    if (!activeWallet.accounts || activeWallet.accounts.length === 0) {
+      throw new Error('No accounts available in the connected wallet');
+    }
+
     // Get suggested params
     const suggestedParams = await algodClient.getTransactionParams().do();
     
     // Create payment transaction to fund campaign
-    // In a real app, this would interact with a smart contract
+    // Using the specific campaign escrow address
     const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       sender: activeWallet.accounts[0].address,
-      receiver: 'CAMPAIGN_ESCROW_ADDRESS', // Replace with actual escrow/contract address
-      amount: algosdk.algosToMicroalgos(amount),
+      receiver: 'EJXBAMX3EEKPJ6VX4XQURMETX6MOWAQLKCFZFP7NLL2FMFCSQUKB354VFE', // Specific campaign address
+      amount: algoToMicroAlgos(amount), // Use our own helper function for consistency
       suggestedParams,
       note: new Uint8Array(Buffer.from(`Fund campaign: ${campaignId}`)),
     });
 
-    // Sign transaction with connected wallet
-    const signedTxns = await activeWallet.signTransactions([txn]);
+    // For Lute wallet, use the specific signing method
+    if (activeWallet.id === 'lute') {
+      try {
+        // Format transaction for Lute wallet - using binary format
+        const txnToSign = [{
+          txn: Buffer.from(algosdk.encodeUnsignedTransaction(txn)),
+          signers: [activeWallet.accounts[0].address]
+        }];
+        
+        // Sign the transaction
+        const signedTxns = await activeWallet.signTransactions(txnToSign);
+        
+        // Submit the signed transaction
+        const response = await algodClient.sendRawTransaction(signedTxns[0]).do();
+        return response.txid;
+      } catch (error) {
+        console.error("Lute wallet transaction error:", error);
+        throw new Error("Transaction failed. Please try again.");
+      }
+    } else {
+      // For other wallets
+      try {
+        // Encode the transaction
+        const encodedTxn = algosdk.encodeUnsignedTransaction(txn);
+        
+        // Sign the transaction
+        const signedTxn = await activeWallet.signTransaction(encodedTxn);
+        
+        // Submit the signed transaction
+        const response = await algodClient.sendRawTransaction(signedTxn).do();
+        const txId = response['txId'];
+        return txId;
+      } catch (error) {
+        console.error("Wallet transaction error:", error);
+        throw new Error("Transaction failed. Please try again.");
+      }
+    }
     
-    // Submit transaction
-    const response = await algodClient.sendRawTransaction(signedTxns[0]).do();
-    const txId = response.txid;
-    
-    return txId;
+    // This line is unreachable since txId is returned in both try blocks above
+    throw new Error('Transaction failed to complete');
   } catch (error) {
     console.error('Failed to fund campaign:', error);
     throw error;
@@ -115,12 +152,23 @@ export const createCampaignContract = async (
       throw new Error('No wallet connected');
     }
 
+    // Ensure we have an account to use
+    if (!activeWallet.accounts || activeWallet.accounts.length === 0) {
+      throw new Error('No accounts available in the connected wallet');
+    }
+
     // This is a placeholder - in a real implementation you would:
     // 1. Compile the smart contract TEAL code
     // 2. Deploy the application
     // 3. Initialize it with campaign parameters
     
     console.log('Creating campaign contract with data:', campaignData);
+    
+    // For a real implementation, you would create an application transaction
+    // const suggestedParams = await algodClient.getTransactionParams().do();
+    // const appArgs = [...]
+    // const txn = algosdk.makeApplicationCreateTxn(...);
+    // Then sign and submit similar to fundCampaign function
     
     // Mock response for demo
     const mockAppId = Math.floor(Math.random() * 1000000);
@@ -144,8 +192,8 @@ export const getTransactionUrl = (txId: string): string => {
 };
 
 export const getAccountUrl = (address: string): string => {
-  // Replace with Lora Explorer URL when available  
-  return `https://testnet.algoexplorer.io/address/${address}`;
+  // Using Lora Explorer URL
+  return `https://lora.algokit.io/testnet/account/${address}`;
 };
 
 export const getApplicationUrl = (appId: number): string => {
