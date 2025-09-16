@@ -1,5 +1,5 @@
 import algosdk from 'algosdk';
-import { PeraWalletConnect } from '@perawallet/connect';
+import { WalletManager, WalletId } from '@txnlab/use-wallet-react';
 
 // Algorand TestNet configuration
 const algodToken = '';
@@ -9,8 +9,15 @@ const algodPort = 443;
 // Initialize Algorand client
 export const algodClient = new algosdk.Algodv2(algodToken, algodServer, algodPort);
 
-// Initialize Pera Wallet
-export const peraWallet = new PeraWalletConnect();
+// Wallet Manager configuration with Lute support
+export const walletManager = new WalletManager({
+  wallets: [
+    WalletId.LUTE,
+    WalletId.PERA,
+    WalletId.DEFLY,
+    WalletId.EXODUS,
+  ],
+});
 
 // Campaign interface
 export interface Campaign {
@@ -23,6 +30,7 @@ export interface Campaign {
   creator: string;
   isActive: boolean;
   appId?: number;
+  txId?: string;
 }
 
 // Mock data for testing (replace with smart contract later)
@@ -59,43 +67,32 @@ export const mockCampaigns: Campaign[] = [
   },
 ];
 
-// Wallet connection functions
-export const connectWallet = async (): Promise<string[]> => {
-  try {
-    const accounts = await peraWallet.connect();
-    return accounts;
-  } catch (error) {
-    console.error('Failed to connect wallet:', error);
-    throw error;
-  }
-};
-
-export const disconnectWallet = () => {
-  peraWallet.disconnect();
-};
-
-// Transaction functions
+// Transaction functions using use-wallet
 export const fundCampaign = async (
   campaignId: string,
   amount: number,
-  senderAddress: string
+  activeWallet: any
 ): Promise<string> => {
   try {
+    if (!activeWallet) {
+      throw new Error('No wallet connected');
+    }
+
     // Get suggested params
     const suggestedParams = await algodClient.getTransactionParams().do();
     
-    // For now, create a simple payment transaction
+    // Create payment transaction to fund campaign
     // In a real app, this would interact with a smart contract
     const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      sender: senderAddress,
-      receiver: 'CAMPAIGN_ESCROW_ADDRESS', // Replace with actual escrow
+      sender: activeWallet.accounts[0].address,
+      receiver: 'CAMPAIGN_ESCROW_ADDRESS', // Replace with actual escrow/contract address
       amount: algosdk.algosToMicroalgos(amount),
       suggestedParams,
       note: new Uint8Array(Buffer.from(`Fund campaign: ${campaignId}`)),
     });
 
-    // Sign transaction with Pera Wallet
-    const signedTxns = await peraWallet.signTransaction([[{ txn, signers: [senderAddress] }]]);
+    // Sign transaction with connected wallet
+    const signedTxns = await activeWallet.signTransactions([txn]);
     
     // Submit transaction
     const response = await algodClient.sendRawTransaction(signedTxns[0]).do();
@@ -108,13 +105,52 @@ export const fundCampaign = async (
   }
 };
 
+// Create campaign smart contract (placeholder for actual deployment)
+export const createCampaignContract = async (
+  campaignData: Omit<Campaign, 'id' | 'raisedAmount' | 'isActive'>,
+  activeWallet: any
+): Promise<{ appId: number; txId: string }> => {
+  try {
+    if (!activeWallet) {
+      throw new Error('No wallet connected');
+    }
+
+    // This is a placeholder - in a real implementation you would:
+    // 1. Compile the smart contract TEAL code
+    // 2. Deploy the application
+    // 3. Initialize it with campaign parameters
+    
+    console.log('Creating campaign contract with data:', campaignData);
+    
+    // Mock response for demo
+    const mockAppId = Math.floor(Math.random() * 1000000);
+    const mockTxId = 'MOCK_TX_' + Date.now();
+    
+    return {
+      appId: mockAppId,
+      txId: mockTxId
+    };
+  } catch (error) {
+    console.error('Failed to create campaign contract:', error);
+    throw error;
+  }
+};
+
 // Get transaction details for Lora explorer
+// Note: Using AlgoExplorer as placeholder - update URL based on preferred explorer
 export const getTransactionUrl = (txId: string): string => {
+  // Replace with Lora Explorer URL when available
   return `https://testnet.algoexplorer.io/tx/${txId}`;
 };
 
 export const getAccountUrl = (address: string): string => {
+  // Replace with Lora Explorer URL when available  
   return `https://testnet.algoexplorer.io/address/${address}`;
+};
+
+export const getApplicationUrl = (appId: number): string => {
+  // Replace with Lora Explorer URL when available
+  return `https://testnet.algoexplorer.io/application/${appId}`;
 };
 
 // Format Algo amounts
@@ -124,4 +160,24 @@ export const formatAlgo = (microAlgos: number): string => {
 
 export const algoToMicroAlgos = (algo: number): number => {
   return Math.round(algo * 1000000);
+};
+
+// Smart Contract utilities
+export const compileProgram = async (programSource: string): Promise<Uint8Array> => {
+  const compileResponse = await algodClient.compile(programSource).do();
+  return new Uint8Array(Buffer.from(compileResponse.result, 'base64'));
+};
+
+export const waitForConfirmation = async (txId: string): Promise<any> => {
+  let response = await algodClient.status().do();
+  let lastround = response['last-round'];
+  
+  while (true) {
+    const pendingInfo = await algodClient.pendingTransactionInformation(txId).do();
+    if (pendingInfo['confirmed-round'] !== null && pendingInfo['confirmed-round'] > 0) {
+      return pendingInfo;
+    }
+    lastround++;
+    await algodClient.statusAfterBlock(lastround).do();
+  }
 };

@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Campaign, fundCampaign, getTransactionUrl } from '@/services/algorand';
+import { useWallet } from '@txnlab/use-wallet-react';
 import { Target, ExternalLink, Wallet } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -11,14 +12,16 @@ interface FundingModalProps {
   campaign: Campaign | null;
   isOpen: boolean;
   onClose: () => void;
-  connectedAccount: string;
 }
 
-const FundingModal = ({ campaign, isOpen, onClose, connectedAccount }: FundingModalProps) => {
+const FundingModal = ({ campaign, isOpen, onClose }: FundingModalProps) => {
+  const { activeWallet } = useWallet();
   const [amount, setAmount] = useState('');
   const [isFunding, setIsFunding] = useState(false);
 
   if (!campaign) return null;
+
+  const connectedAccount = activeWallet?.accounts[0]?.address || '';
 
   const handleFund = async () => {
     const fundAmount = parseFloat(amount);
@@ -28,9 +31,14 @@ const FundingModal = ({ campaign, isOpen, onClose, connectedAccount }: FundingMo
       return;
     }
 
+    if (!activeWallet) {
+      toast.error('Please connect your wallet first');
+      return;
+    }
+
     setIsFunding(true);
     try {
-      const txId = await fundCampaign(campaign.id, fundAmount, connectedAccount);
+      const txId = await fundCampaign(campaign.id, fundAmount, activeWallet);
       
       toast.success(
         <div className="flex items-center gap-2">
@@ -101,12 +109,14 @@ const FundingModal = ({ campaign, isOpen, onClose, connectedAccount }: FundingMo
             </p>
           </div>
 
-          <div className="bg-gradient-primary/10 rounded-lg p-3">
-            <div className="flex items-center gap-2 text-sm">
-              <Wallet className="h-4 w-4 text-primary" />
-              <span>Connected: {connectedAccount.slice(0, 6)}...{connectedAccount.slice(-4)}</span>
+          {connectedAccount && (
+            <div className="bg-gradient-primary/10 rounded-lg p-3">
+              <div className="flex items-center gap-2 text-sm">
+                <Wallet className="h-4 w-4 text-primary" />
+                <span>Connected: {connectedAccount.slice(0, 6)}...{connectedAccount.slice(-4)}</span>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="flex gap-2 pt-4">
             <Button
@@ -118,7 +128,7 @@ const FundingModal = ({ campaign, isOpen, onClose, connectedAccount }: FundingMo
             </Button>
             <Button
               onClick={handleFund}
-              disabled={isFunding || !amount}
+              disabled={isFunding || !amount || !activeWallet}
               className="flex-1 bg-gradient-fund hover:opacity-90"
             >
               {isFunding ? 'Processing...' : `Fund ${amount || '0'} ALGO`}

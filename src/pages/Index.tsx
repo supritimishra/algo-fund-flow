@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
+import { useWallet } from '@txnlab/use-wallet-react';
 import WalletConnection from '@/components/WalletConnection';
 import CampaignCard from '@/components/CampaignCard';
 import CreateCampaign from '@/components/CreateCampaign';
@@ -8,18 +9,21 @@ import { Campaign, mockCampaigns } from '@/services/algorand';
 import { Coins, TrendingUp, Users, Target } from 'lucide-react';
 
 const Index = () => {
-  const [connectedAccounts, setConnectedAccounts] = useState<string[]>([]);
+  const { activeWallet } = useWallet();
   const [campaigns, setCampaigns] = useState<Campaign[]>(mockCampaigns);
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [isFundingModalOpen, setIsFundingModalOpen] = useState(false);
 
-  const isConnected = connectedAccounts.length > 0;
+  const isConnected = !!activeWallet;
+  const connectedAccounts = activeWallet?.accounts.map(acc => acc.address) || [];
+
   const totalRaised = campaigns.reduce((sum, campaign) => sum + campaign.raisedAmount, 0);
   const activeCampaigns = campaigns.filter(campaign => campaign.isActive).length;
   const totalBackers = campaigns.length * 15; // Mock backer count
 
   const handleAccountChange = (accounts: string[]) => {
-    setConnectedAccounts(accounts);
+    // This is handled by the useWallet hook internally
+    console.log('Accounts changed:', accounts);
   };
 
   const handleFundCampaign = (campaign: Campaign) => {
@@ -180,7 +184,6 @@ const Index = () => {
           setIsFundingModalOpen(false);
           setSelectedCampaign(null);
         }}
-        connectedAccount={connectedAccounts[0] || ''}
       />
     </div>
   );
