@@ -5,8 +5,13 @@ import WalletConnection from '@/components/WalletConnection';
 import CampaignCard from '@/components/CampaignCard';
 import CreateCampaign from '@/components/CreateCampaign';
 import FundingModal from '@/components/FundingModal';
+<<<<<<< HEAD
 import { Campaign } from '@/services/algorand';
 import { useCampaignStore } from '@/store/CampaignStore';
+=======
+import ConnectWalletButton from '@/components/ConnectWalletButton';
+import { Campaign, mockCampaigns } from '@/services/algorand';
+>>>>>>> 6e027deec989a4e5c57f3a38f60790844e36e282
 import { Coins, TrendingUp, Users, Target } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 
@@ -65,7 +70,11 @@ const Index = () => {
                 isConnected={isConnected}
                 onCampaignCreate={handleCreateCampaign}
               />
-              <WalletConnection onAccountChange={handleAccountChange} />
+              {!isConnected ? (
+                <ConnectWalletButton />
+              ) : (
+                <WalletConnection onAccountChange={handleAccountChange} />
+              )}
             </div>
           </div>
         </div>

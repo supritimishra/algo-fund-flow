@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useWallet } from '@txnlab/use-wallet-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -15,6 +16,8 @@ const WalletConnection = ({ onAccountChange }: WalletConnectionProps) => {
 
   const connectedAccounts = activeWallet?.accounts.map(acc => acc.address) || [];
 
+  // Auto-connect functionality completely removed to prevent popups on refresh
+
   const handleConnect = async (walletId: string) => {
     try {
       const wallet = wallets.find(w => w.id === walletId);
@@ -23,14 +26,9 @@ const WalletConnection = ({ onAccountChange }: WalletConnectionProps) => {
         // Get accounts after connection
         const accounts = wallet.accounts.map(acc => acc.address);
         onAccountChange(accounts);
-        toast.success(`${wallet.metadata.name} connected successfully!`);
       }
     } catch (error: any) {
-      if (error.message?.includes('cancelled') || error.message?.includes('rejected')) {
-        toast.error('Connection cancelled by user');
-      } else {
-        toast.error(`Failed to connect wallet: ${error.message}`);
-      }
+      // Removed error toasts
       console.error('Wallet connection error:', error);
     }
   };
@@ -69,36 +67,36 @@ const WalletConnection = ({ onAccountChange }: WalletConnectionProps) => {
 
   if (activeWallet && connectedAccounts.length > 0) {
     return (
-      <Card className="p-4 bg-gradient-primary text-white shadow-campaign">
+      <Card className="p-2 bg-gradient-primary text-white shadow-campaign">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-xl">{getWalletIcon(activeWallet.id)}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm">{getWalletIcon(activeWallet.id)}</span>
             <div>
-              <p className="font-medium flex items-center gap-2">
+              <p className="text-xs flex items-center gap-1">
                 {activeWallet.metadata.name}
-                <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                <span className="text-xs bg-white/20 px-1 py-0.5 rounded-full">
                   Connected
                 </span>
               </p>
-              <p className="text-sm opacity-90">{truncateAddress(connectedAccounts[0])}</p>
+              <p className="text-xs opacity-90">{truncateAddress(connectedAccounts[0])}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Button
               variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/20"
+              size="icon"
+              className="text-white hover:bg-white/20 h-6 w-6 p-0"
               onClick={() => window.open(getAccountUrl(connectedAccounts[0]), '_blank')}
             >
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="h-3 w-3" />
             </Button>
             <Button
               variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/20"
+              size="icon"
+              className="text-white hover:bg-white/20 h-6 w-6 p-0"
               onClick={handleDisconnect}
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-3 w-3" />
             </Button>
           </div>
         </div>
@@ -128,44 +126,75 @@ const WalletConnection = ({ onAccountChange }: WalletConnectionProps) => {
     );
   }
 
+  // Find Lute wallet in available wallets
+  const luteWallet = availableWallets.find(wallet => wallet.id === 'lute');
+  
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button className="bg-gradient-primary hover:opacity-90 shadow-fund">
-          <Wallet className="mr-2 h-4 w-4" />
-          Connect Wallet
-          <ChevronDown className="ml-2 h-4 w-4" />
+    <div className="flex flex-col gap-2">
+      {/* Direct Lute Wallet connection button */}
+      {luteWallet ? (
+        <Button 
+          className="bg-gradient-primary hover:opacity-90 shadow-fund"
+          onClick={() => handleConnect('lute')}
+        >
+          <span className="mr-2 text-lg">🎵</span>
+          Connect Lute Wallet
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
-        {availableWallets.map((wallet) => (
-          <DropdownMenuItem
-            key={wallet.id}
-            onClick={() => handleConnect(wallet.id)}
-            className="flex items-center gap-3 cursor-pointer"
-          >
-            <span className="text-lg">{getWalletIcon(wallet.id)}</span>
-            <div>
-              <p className="font-medium">{wallet.metadata.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {wallet.isActive ? 'Ready to connect' : 'Install required'}
-              </p>
-            </div>
-          </DropdownMenuItem>
-        ))}
-        <DropdownMenuItem asChild>
+      ) : (
+        <Button 
+          className="bg-gradient-primary hover:opacity-90 shadow-fund"
+          asChild
+        >
           <a
             href="https://chromewebstore.google.com/detail/lute/kiaoohollfkjhikdifohdckeidckokjh"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 text-primary"
           >
-            <ExternalLink className="h-4 w-4" />
-            <span>Install Lute Wallet</span>
+            <ExternalLink className="mr-2 h-4 w-4" />
+            Install Lute Wallet
           </a>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </Button>
+      )}
+      
+      {/* Other wallets dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className="w-full">
+            <Wallet className="mr-2 h-4 w-4" />
+            Other Wallets
+            <ChevronDown className="ml-2 h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56">
+          {availableWallets.map((wallet) => (
+            <DropdownMenuItem
+              key={wallet.id}
+              onClick={() => handleConnect(wallet.id)}
+              className="flex items-center gap-3 cursor-pointer"
+            >
+              <span className="text-lg">{getWalletIcon(wallet.id)}</span>
+              <div>
+                <p className="font-medium">{wallet.metadata.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {wallet.isActive ? 'Ready to connect' : 'Install required'}
+                </p>
+              </div>
+            </DropdownMenuItem>
+          ))}
+          <DropdownMenuItem asChild>
+            <a
+              href="https://chromewebstore.google.com/detail/lute/kiaoohollfkjhikdifohdckeidckokjh"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 text-primary"
+            >
+              <ExternalLink className="h-4 w-4" />
+              <span>Install Lute Wallet</span>
+            </a>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };
 
