@@ -66,6 +66,9 @@ npm run dev
 ```
 
 Then open http://localhost:3000 (or the configured port).
+Smart Contract Deployment Setup :
+<img width="878" height="304" alt="Screenshot 2025-09-16 160625" src="https://github.com/user-attachments/assets/97ebe00a-05f8-4d59-906a-408ed239361d" />
+
 
 🧪 Demo Flow
 Create a campaign → supply goal, title, description
