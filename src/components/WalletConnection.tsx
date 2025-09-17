@@ -58,7 +58,7 @@ const WalletConnection = ({ onAccountChange }: WalletConnectionProps) => {
 
   if (activeWallet && connectedAccounts.length > 0) {
     return (
-      <Card className="p-2 bg-gradient-primary text-white shadow-campaign">
+  <Card className="p-2 bg-gradient-primary text-white shadow-campaign">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Wallet className="h-4 w-4" />
@@ -103,21 +103,22 @@ const WalletConnection = ({ onAccountChange }: WalletConnectionProps) => {
       <Card className="p-8 bg-card/30 backdrop-blur-md border border-primary/20 shadow-campaign rounded-xl">
         <div className="w-full flex flex-col items-center justify-center text-center gap-5">
           <p className="text-base font-semibold">No supported wallets found</p>
-          <div className="flex items-center gap-3">
-            <ConnectWalletButton />
-            <Button 
-              className="bg-gradient-primary hover:opacity-90 shadow-fund"
-              asChild
-            >
-              <a 
-                href="https://chromewebstore.google.com/detail/lute/kiaoohollfkjhikdifohdckeidckokjh" 
-                target="_blank" 
-                rel="noopener noreferrer"
+            <div className="flex items-center gap-3">
+              <ConnectWalletButton />
+              <Button 
+                size="sm"
+                className="bg-gradient-primary hover:opacity-90 shadow-fund"
+                asChild
               >
-                Install Lute
-              </a>
-            </Button>
-          </div>
+                <a 
+                  href="https://chromewebstore.google.com/detail/lute/kiaoohollfkjhikdifohdckeidckokjh" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  Install Lute
+                </a>
+              </Button>
+            </div>
           <p className="text-sm text-muted-foreground">Install a wallet to connect and start using AlgoFund</p>
         </div>
       </Card>
@@ -132,6 +133,7 @@ const WalletConnection = ({ onAccountChange }: WalletConnectionProps) => {
       {/* Direct Lute Wallet connection button */}
       {luteWallet ? (
         <Button 
+          size="sm"
           className="bg-gradient-primary hover:opacity-90 shadow-fund"
           onClick={() => handleConnect('lute')}
         >
@@ -140,6 +142,7 @@ const WalletConnection = ({ onAccountChange }: WalletConnectionProps) => {
         </Button>
       ) : (
         <Button 
+          size="sm"
           className="bg-gradient-primary hover:opacity-90 shadow-fund"
           asChild
         >

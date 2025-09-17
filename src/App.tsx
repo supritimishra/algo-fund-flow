@@ -11,6 +11,8 @@ import Create from "./pages/Create";
 import { CampaignStoreProvider } from '@/store/CampaignStore';
 import CampaignPage from './pages/Campaign';
 import DonatePage from './pages/Donate';
+import LeaderboardPage from './pages/Leaderboard';
+import ProfilePage from './pages/Profile';
 
 const queryClient = new QueryClient();
 
@@ -26,6 +28,8 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/create" element={<Create />} />
               <Route path="/donate" element={<DonatePage />} />
+              <Route path="/leaderboard" element={<LeaderboardPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
               <Route path="/campaign/:id" element={<CampaignPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

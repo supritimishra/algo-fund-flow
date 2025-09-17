@@ -67,6 +67,11 @@ export const mockCampaigns: Campaign[] = [
     raisedAmount: 32500,
     deadline: new Date('2024-12-31'),
     creator: 'ABCD...EFGH',
+    donors: [
+      { address: '6SICZRQ4MXG2CCJKFNICBU73S7EKX3M55NINLH75LQFYMZZM4XK7EZLVYQ', amount: 2500 },
+      { address: '3N6XQY4ZQJ5F6V7W2K4Z7P6Y3J4K8M2N5L1A2B3C4D5E6F7G8H9I0J1K', amount: 1000 },
+      { address: 'A2R8D3F6G9H1J2K3L4M5N6O7P8Q9R0S1T2U3V4W5X6Y7Z8A9B0C1D2E', amount: 500 }
+    ],
     isActive: true,
   },
   {
@@ -77,6 +82,10 @@ export const mockCampaigns: Campaign[] = [
     raisedAmount: 18750,
     deadline: new Date('2024-11-15'),
     creator: 'IJKL...MNOP',
+    donors: [
+      { address: 'Z9Y8X7W6V5U4T3S2R1Q0P9O8N7M6L5K4J3I2H1G0F9E8D7C6B5A4', amount: 250 },
+      { address: 'B2N7M4L1K9J8H7G6F5E4D3C2B1A0Z9Y8X7W6V5U4T3S2R1Q0', amount: 750 }
+    ],
     isActive: true,
   },
   {
@@ -126,16 +135,14 @@ export const fundCampaign = async (
     try {
       // Encode unsigned txn
       const encodedUnsignedTxn = algosdk.encodeUnsignedTransaction(txn);
-      
-      // Prefer Lute if available, else use the active wallet
-      const walletForSign = getPreferredWallet(activeWallet);
+
       // Sign using the most compatible methods across wallets
+      const walletForSign = getPreferredWallet(activeWallet);
       let signedBytes: Uint8Array;
       try {
         signedBytes = await signWithActiveWallet(walletForSign, encodedUnsignedTxn, activeWallet.accounts[0].address);
       } catch (signErr: any) {
-        // If the active wallet cannot sign (e.g., running in a context without a compatible wallet),
-        // surface the unsigned transaction in base64 so the UI can present a manual-sign flow.
+        // If the active wallet cannot sign, surface the unsigned transaction for manual signing in the UI.
         const unsignedB64 = bytesToBase64(encodedUnsignedTxn);
         const err: any = new Error('Manual signing required');
         err.manualSign = true;
@@ -307,6 +314,97 @@ export const algoToMicroAlgos = (algo: number): number => {
   return Math.round(algo * 1000000);
 };
 
+// Build an unsigned payment transaction object and return its encoded unsigned bytes (Uint8Array)
+export const buildUnsignedPaymentTxn = async (
+  sender: string,
+  receiver: string,
+  amountAlgo: number,
+  note?: string
+): Promise<Uint8Array> => {
+  const client = await getAlgodClientWithFallback();
+  const suggestedParams = await client.getTransactionParams().do();
+  const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+    sender,
+    receiver,
+    amount: algoToMicroAlgos(amountAlgo),
+    suggestedParams,
+    note: note ? new TextEncoder().encode(note) : undefined,
+  });
+  return algosdk.encodeUnsignedTransaction(txn);
+};
+
+// Try to sign and send a payment using the connected/preferred wallet (Lute preferred).
+// If the wallet cannot sign, throws an error with `.manualSign = true` and `.unsignedTxn` (base64).
+export const sendPaymentWithWallet = async (
+  activeWallet: any,
+  sender: string,
+  receiver: string,
+  amountAlgo: number,
+  note?: string
+): Promise<string> => {
+  if (!activeWallet) throw new Error('No wallet connected');
+  const client = await getAlgodClientWithFallback();
+  const suggestedParams = await client.getTransactionParams().do();
+  const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+    sender,
+    receiver,
+    amount: algoToMicroAlgos(amountAlgo),
+    suggestedParams,
+    note: note ? new TextEncoder().encode(note) : undefined,
+  });
+  const encodedUnsignedTxn = algosdk.encodeUnsignedTransaction(txn);
+  const walletForSign = getPreferredWallet(activeWallet);
+  try {
+    const signed = await signWithActiveWallet(walletForSign, encodedUnsignedTxn, sender);
+    const sendResponse = await client.sendRawTransaction(signed).do();
+    const txId = (sendResponse as any).txId || (sendResponse as any)['txid'] || (sendResponse as any)['txId'];
+    await waitForConfirmation(txId, client);
+    return txId;
+  } catch (e: any) {
+    // If signing isn't supported, prepare manual-sign payload
+    const unsignedB64 = bytesToBase64(encodedUnsignedTxn);
+    const err: any = new Error('Manual signing required');
+    err.manualSign = true;
+    err.unsignedTxn = unsignedB64;
+    throw err;
+  }
+};
+
+// Create a small proof transaction (0 ALGO) with a note and sign+send via wallet.
+// Useful for 'claim reward' patterns where on-chain proof is used to claim off-chain tokens.
+export const signProofWithWallet = async (
+  activeWallet: any,
+  sender: string,
+  note: string
+): Promise<string> => {
+  if (!activeWallet) throw new Error('No wallet connected');
+  const client = await getAlgodClientWithFallback();
+  const suggestedParams = await client.getTransactionParams().do();
+  // Use a self-payment of 0 ALGO with a note as proof
+  const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+    sender,
+    receiver: sender,
+    amount: 0,
+    suggestedParams,
+    note: new TextEncoder().encode(note),
+  });
+  const encoded = algosdk.encodeUnsignedTransaction(txn);
+  const walletForSign = getPreferredWallet(activeWallet);
+  try {
+    const signed = await signWithActiveWallet(walletForSign, encoded, sender);
+    const sendResponse = await client.sendRawTransaction(signed).do();
+    const txId = (sendResponse as any).txId || (sendResponse as any)['txid'] || (sendResponse as any)['txId'];
+    await waitForConfirmation(txId, client);
+    return txId;
+  } catch (e: any) {
+    const unsignedB64 = bytesToBase64(encoded);
+    const err: any = new Error('Manual signing required');
+    err.manualSign = true;
+    err.unsignedTxn = unsignedB64;
+    throw err;
+  }
+};
+
 // Smart Contract utilities
 export const compileProgram = async (programSource: string, client?: algosdk.Algodv2): Promise<Uint8Array> => {
   const algod = client || algodClient;
@@ -373,7 +471,7 @@ function getPreferredWallet(activeWallet: any): any {
   }
   return activeWallet;
 }
-function getReceiverAddress(campaignId: string): string {
+export function getReceiverAddress(campaignId: string): string {
   // Priority: explicit per-campaign mapping in localStorage, then env, then generic localStorage
   const perCampaign = localStorage.getItem(`FUND_RECEIVER_ADDRESS:${campaignId}`);
   const fromEnv = (import.meta as any).env?.VITE_FUND_RECEIVER_ADDRESS as string | undefined;

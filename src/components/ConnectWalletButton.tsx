@@ -31,8 +31,8 @@ const ConnectWalletButton = () => {
   return (
     <Button 
       onClick={connectToLuteWallet}
-      className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-3 py-1 h-8"
       size="sm"
+      className="bg-blue-500 hover:bg-blue-600 text-white"
     >
       Connect Wallet
     </Button>

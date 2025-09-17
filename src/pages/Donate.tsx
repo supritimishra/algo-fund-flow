@@ -75,6 +75,8 @@ const DonatePage = () => {
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => navigate('/create')}>Create Campaign</Button>
             <Button onClick={() => navigate('/')}>Explore</Button>
+            <Button size="sm" onClick={() => navigate('/leaderboard')}>Manual Leaderboard</Button>
+            <Button size="sm" onClick={() => navigate('/profile')}>Profile</Button>
           </div>
         </div>
 

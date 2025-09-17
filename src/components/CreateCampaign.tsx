@@ -12,6 +12,7 @@ const CreateCampaign = ({ isConnected }: CreateCampaignProps) => {
   return (
     <Button
       onClick={() => navigate('/create')}
+      size="sm"
       className="bg-gradient-success hover:opacity-90 shadow-fund"
     >
       <Plus className="mr-2 h-4 w-4" />
