@@ -50,8 +50,9 @@ Copy code
 Install dependencies
 
 ```bash
-Copy code
+ Copy code
 npm install
+```
 Configure environment
 
 Add Algorand node / API keys if needed
@@ -59,10 +60,11 @@ Add Algorand node / API keys if needed
 Set any .env variables required (e.g., smart contract addresses)
 
 Run development server
-
 ```bash
 Copy code
 npm run dev
+```
+
 Then open http://localhost:3000 (or the configured port).
 
 🧪 Demo Flow
@@ -96,17 +98,17 @@ Create a feature branch
 Copy code
 git checkout -b feature/my-cool-feature
 Commit your changes
-
+```
 ```bash
 Copy code
 git commit -m "Add awesome feature"
 Push
-
+```
 ```bash
 Copy code
 git push origin feature/my-cool-feature
 Open a Pull Request
-
+```
 📝 License & Credits
 License: MIT (or whichever you choose)
 
