@@ -9,6 +9,8 @@ import { Campaign } from '@/services/algorand';
 import { useCampaignStore } from '@/store/CampaignStore';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import { Coins, TrendingUp, Users, Target, Shield, Zap, Globe, Lock, Award, Heart } from 'lucide-react';
+import HeroBackground from '@/components/HeroBackground';
+import { useNavigate } from 'react-router-dom';
 import ThemeToggle from '@/components/ThemeToggle';
 import DonateButton from '@/components/DonateButton';
 
@@ -36,6 +38,32 @@ const Index = () => {
   };
 
   const handleCreateCampaign = (_newCampaign: Campaign) => {};
+  const navigate = useNavigate();
+  const { wallets } = useWallet();
+
+  const getStarted = async () => {
+    try {
+      // If already connected, just navigate
+      if (activeWallet) {
+        navigate('/create');
+        return;
+      }
+
+      // attempt to connect (open Lute if available)
+      const lute = wallets.find(w => w.id === 'lute');
+      if (lute) {
+        await lute.connect();
+      } else {
+        window.open('https://chromewebstore.google.com/detail/lute/kiaoohollfkjhikdifohdckeidckokjh', '_blank');
+      }
+
+      // navigate after connect
+      navigate('/create');
+    } catch (err) {
+      console.error('Get started/connect error', err);
+      navigate('/create');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,6 +105,59 @@ const Index = () => {
           </div>
         </div>
       </header>
+      {/* Hero Section */}
+      <section className="py-20 bg-gradient-to-b from-background to-background/95">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div>
+              <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4">Support projects that matter — fast, low-fee crowdfunding on Algorand</h1>
+              <p className="text-lg text-muted-foreground max-w-2xl mb-6">Create campaigns and accept donations with instant finality, transparent history on-chain, and minimal fees. Join a global community of creators and backers.</p>
+
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={getStarted}
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-green-400 to-blue-500 text-white px-5 py-3 rounded-lg shadow-md hover:shadow-lg"
+                >
+                  Get Started
+                </button>
+              </div>
+
+              <div className="mt-8 flex items-center gap-6 text-sm text-muted-foreground">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Coins className="w-4 h-4 text-primary" />
+                  </div>
+                  <div>
+                    <div className="text-base font-semibold">{totalRaised.toLocaleString()} ALGO</div>
+                    <div className="text-xs">Total Raised</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-accent/10 flex items-center justify-center">
+                    <Users className="w-4 h-4 text-accent" />
+                  </div>
+                  <div>
+                    <div className="text-base font-semibold">{totalBackers.toLocaleString()}</div>
+                    <div className="text-xs">Backers</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative w-full h-80 md:h-96">
+              <HeroBackground />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <img
+                  src="/placeholder.png"
+                  alt="hero"
+                  className="w-full max-w-lg rounded-xl shadow-xl opacity-95"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Hero Stats */}
       <section className="py-8 bg-gradient-to-br from-primary/5 to-accent/5">
