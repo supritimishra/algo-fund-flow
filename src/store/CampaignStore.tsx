@@ -27,11 +27,13 @@ export const CampaignStoreProvider = ({ children }: { children: ReactNode }) => 
       const updatedDonors = existing
         ? donors.map(d => d.address === donorAddress ? { ...d, amount: d.amount + amount } : d)
         : [...donors, { address: donorAddress, amount }];
-      return {
+      const updated = {
         ...c,
         donors: updatedDonors,
         raisedAmount: c.raisedAmount + amount,
       };
+      try { console.debug('[CampaignStore] addDonation:', campaignId, donorAddress, amount, 'updated:', updated); } catch (_) {}
+      return updated;
     }));
   };
 

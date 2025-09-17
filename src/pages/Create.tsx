@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import CampaignForm, { CampaignFormValues } from '@/components/campaign/CampaignForm';
 import Leaderboard, { Donor } from '@/components/campaign/Leaderboard';
 import { useCampaignStore } from '@/store/CampaignStore';
-import { createCampaignContract, getTransactionUrl } from '@/services/algorand';
+import { createCampaignContract, getTransactionUrl, submitSignedTransactionBase64 } from '@/services/algorand';
 
 const Create = () => {
   const { activeWallet } = useWallet();
@@ -25,10 +25,11 @@ const Create = () => {
       return;
     }
     setCreating(true);
+    let newCampaign: any = null;
     try {
       const id = Date.now().toString();
       const creator = activeWallet?.accounts[0]?.address || 'WALLET';
-      const newCampaign = {
+      newCampaign = {
         id,
         title: values.title,
         description: values.description,
@@ -40,21 +41,69 @@ const Create = () => {
         imageUrl: values.imageUrl || undefined,
         donors: [],
       };
-      // Trigger wallet popup and on-chain tx during creation
-      const { txId, appId } = await createCampaignContract(newCampaign as any, activeWallet);
-      if (appId) {
-        (newCampaign as any).appId = appId;
-      }
-      (newCampaign as any).txId = txId;
+      // Trigger wallet popup and on-chain tx during creation. Race against
+      // a timeout so the UI doesn't get stuck on this page if confirmation
+      // takes a long time. The service now tries to avoid blocking, but
+      // this extra safety ensures navigation regardless.
+      const createPromise = createCampaignContract(newCampaign as any, activeWallet);
+      const timeoutMs = 12000;
+      const result: any = await Promise.race([
+        createPromise,
+        new Promise(res => setTimeout(() => res({ __timedOut: true }), timeoutMs)),
+      ]);
 
-      addCampaign(newCampaign);
-      toast.success('Campaign created and transaction confirmed. Opening explorer...');
-      try { window.open(getTransactionUrl(txId), '_blank'); } catch (_) {}
-      // Navigate to home so the newly created campaign is visible in the list
-      navigate('/');
-    } catch (err) {
-      toast.error('Failed to create campaign');
-      console.error(err);
+      if (result && result.__timedOut) {
+        // We didn't get a response within timeout — still add the campaign
+        // locally so it appears in the list, and navigate home. The
+        // background operation may still finish and update later.
+        (newCampaign as any).txId = undefined;
+        addCampaign(newCampaign);
+        toast('Transaction pending — navigating home. It may take a moment to appear on-chain.', { icon: '⏳' });
+        navigate('/');
+      } else {
+        const { txId, appId } = result || {};
+        if (appId) {
+          (newCampaign as any).appId = appId;
+        }
+        (newCampaign as any).txId = txId;
+
+        addCampaign(newCampaign);
+        toast.success('Campaign created and transaction submitted. Opening explorer...');
+        try { window.open(getTransactionUrl(txId), '_blank'); } catch (_) {}
+        // Navigate to home so the newly created campaign is visible in the list
+        navigate('/');
+      }
+    } catch (err: any) {
+      // Support manual-sign fallback: createCampaignContract may throw an error
+      // with `manualSign` and `unsignedTxn` when the active wallet cannot sign.
+      if (err?.manualSign && err?.unsignedTxn) {
+        const unsigned = err.unsignedTxn as string;
+        try {
+          await navigator.clipboard.writeText(unsigned);
+          toast('Unsigned transaction copied to clipboard. Paste signed base64 to submit.', { icon: '✍️' });
+        } catch (_) {
+          // ignore clipboard failures
+        }
+        const signed = window.prompt('Unsigned transaction copied to clipboard. Paste signed transaction base64 to submit:');
+        if (signed) {
+          try {
+            const txId = await submitSignedTransactionBase64(signed);
+            (newCampaign as any).txId = txId;
+            addCampaign(newCampaign);
+            toast.success('Campaign created and transaction submitted. Opening explorer...');
+            try { window.open(getTransactionUrl(txId), '_blank'); } catch (_) {}
+            navigate('/');
+          } catch (e) {
+            console.error('Failed to submit signed create txn', e);
+            toast.error('Failed to submit signed transaction');
+          }
+        } else {
+          toast.error('Signed transaction not provided — campaign not created');
+        }
+      } else {
+        toast.error('Failed to create campaign');
+        console.error(err);
+      }
     } finally {
       setCreating(false);
     }

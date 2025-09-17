@@ -130,7 +130,19 @@ export const fundCampaign = async (
       // Prefer Lute if available, else use the active wallet
       const walletForSign = getPreferredWallet(activeWallet);
       // Sign using the most compatible methods across wallets
-      const signedBytes = await signWithActiveWallet(walletForSign, encodedUnsignedTxn, activeWallet.accounts[0].address);
+      let signedBytes: Uint8Array;
+      try {
+        signedBytes = await signWithActiveWallet(walletForSign, encodedUnsignedTxn, activeWallet.accounts[0].address);
+      } catch (signErr: any) {
+        // If the active wallet cannot sign (e.g., running in a context without a compatible wallet),
+        // surface the unsigned transaction in base64 so the UI can present a manual-sign flow.
+        const unsignedB64 = bytesToBase64(encodedUnsignedTxn);
+        const err: any = new Error('Manual signing required');
+        err.manualSign = true;
+        err.unsignedTxn = unsignedB64;
+        err.note = `Fund campaign ${campaignId}`;
+        throw err;
+      }
 
       // Submit the transaction
       const sendResponse = await client.sendRawTransaction(signedBytes).do();
@@ -140,12 +152,33 @@ export const fundCampaign = async (
       await waitForConfirmation(txId, client);
       return txId;
     } catch (error: any) {
+      if (error && error.manualSign) throw error;
       console.error('Wallet/transaction error:', error);
       throw new Error(mapAlgodOrWalletError(error));
     }
   } catch (error) {
     console.error('Failed to fund campaign:', error);
     throw error;
+  }
+};
+
+// Allow submitting a signed transaction provided as base64 (useful for manual-sign flows)
+export const submitSignedTransactionBase64 = async (signedB64: string): Promise<string> => {
+  try {
+    const client = await getAlgodClientWithFallback();
+    const signedBytes = base64ToBytes(signedB64);
+    const sendResponse = await client.sendRawTransaction(signedBytes).do();
+    const txId = (sendResponse as any).txId || (sendResponse as any)['txid'] || (sendResponse as any)['txId'];
+    // Wait for confirmation (with timeout). Only return after confirmed so
+    // callers can safely update UI/state knowing the tx reached the ledger.
+    const pending = await waitForConfirmationWithTimeout(txId, client, 60000);
+    if (!pending) {
+      throw new Error('Transaction submitted but not confirmed within timeout');
+    }
+    return txId;
+  } catch (e) {
+    console.error('Failed to submit signed transaction:', e);
+    throw e;
   }
 };
 
@@ -175,7 +208,7 @@ export const createCampaignContract = async (
 
       const suggestedParams = await client.getTransactionParams().do();
       const appCreateTxn = algosdk.makeApplicationCreateTxnFromObject({
-        from: sender,
+        sender: sender,
         approvalProgram,
         clearProgram,
         numGlobalByteSlices: 0,
@@ -189,13 +222,26 @@ export const createCampaignContract = async (
 
       const encodedUnsignedTxn = algosdk.encodeUnsignedTransaction(appCreateTxn);
       const walletForSign = getPreferredWallet(activeWallet);
-      const signedBytes = await signWithActiveWallet(walletForSign, encodedUnsignedTxn, sender);
+      let signedBytes: Uint8Array;
+      try {
+        signedBytes = await signWithActiveWallet(walletForSign, encodedUnsignedTxn, sender);
+      } catch (signErr: any) {
+        const unsignedB64 = bytesToBase64(encodedUnsignedTxn);
+        const err: any = new Error('Manual signing required for app creation');
+        err.manualSign = true;
+        err.unsignedTxn = unsignedB64;
+        err.note = `Create campaign app: ${campaignData.title}`;
+        throw err;
+      }
       const sendResponse = await client.sendRawTransaction(signedBytes).do();
       const txId = (sendResponse as any).txId || (sendResponse as any)['txid'] || (sendResponse as any)['txId'];
-      const pending = await waitForConfirmation(txId, client);
-      const appId = pending['application-index'] as number;
-      if (!appId) throw new Error('App creation returned no application-index');
-      return { appId, txId };
+      // Try to get the app id quickly, but don't block the UI indefinitely.
+      // If the create hasn't confirmed within the timeout we return the txId
+      // so the app can continue (navigate, show explorer) while confirmation
+      // finishes in the background.
+      const pending = await waitForConfirmationWithTimeout(txId, client, 15000);
+      const appId = pending ? (pending['application-index'] as number) : 0;
+      return { appId: appId || 0, txId };
     } catch (e) {
       console.warn('App create failed, falling back to minimal payment:', e);
       // Fallback: perform minimal payment to still trigger wallet popup
@@ -210,10 +256,22 @@ export const createCampaignContract = async (
       });
       const encodedUnsignedTxn = algosdk.encodeUnsignedTransaction(txn);
       const walletForSign = getPreferredWallet(activeWallet);
-      const signedBytes = await signWithActiveWallet(walletForSign, encodedUnsignedTxn, sender);
-      const sendResponse = await client.sendRawTransaction(signedBytes).do();
+      let signedBytes2: Uint8Array;
+      try {
+        signedBytes2 = await signWithActiveWallet(walletForSign, encodedUnsignedTxn, sender);
+      } catch (signErr: any) {
+        const unsignedB64 = bytesToBase64(encodedUnsignedTxn);
+        const err: any = new Error('Manual signing required for fallback payment');
+        err.manualSign = true;
+        err.unsignedTxn = unsignedB64;
+        err.note = `Create campaign fallback payment: ${campaignData.title}`;
+        throw err;
+      }
+      const sendResponse = await client.sendRawTransaction(signedBytes2).do();
       const txId = (sendResponse as any).txId || (sendResponse as any)['txid'] || (sendResponse as any)['txId'];
-      await waitForConfirmation(txId, client);
+      // Don't block create flow waiting for confirmation in the fallback payment.
+      // Wait briefly to give a chance for quick confirmations, otherwise return.
+      await waitForConfirmationWithTimeout(txId, client, 8000).catch(() => null);
       // No appId available in fallback
       return { appId: 0, txId };
     }
@@ -275,6 +333,33 @@ export const waitForConfirmation = async (txId: string, client?: algosdk.Algodv2
     lastround++;
     await algod.statusAfterBlock(lastround).do();
   }
+};
+
+// Wait for confirmation but resolve null if it doesn't confirm within timeoutMs
+export const waitForConfirmationWithTimeout = async (
+  txId: string,
+  client?: algosdk.Algodv2,
+  timeoutMs = 10000
+): Promise<any | null> => {
+  const algod = client || algodClient;
+  const start = Date.now();
+  try {
+    let response = await algod.status().do();
+    let lastround = response['last-round'];
+    while (Date.now() - start < timeoutMs) {
+      const pendingInfo = await algod.pendingTransactionInformation(txId).do();
+      if (pendingInfo['confirmed-round'] !== null && pendingInfo['confirmed-round'] > 0) {
+        return pendingInfo;
+      }
+      lastround++;
+      // Wait a single block (statusAfterBlock will resolve when the block is produced)
+      await algod.statusAfterBlock(lastround).do();
+    }
+  } catch (e) {
+    // Ignore and return null so callers can continue
+    console.warn('Confirmation check failed or timed out:', e);
+  }
+  return null;
 };
 
 // Helpers
