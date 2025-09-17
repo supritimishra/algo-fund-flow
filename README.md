@@ -1,73 +1,122 @@
-# Welcome to your Lovable project
+# ⚡ Algo Fund  
+A decentralized crowdfunding platform built on **Algorand**, with gamified donor features like leaderboards, badges, and bounties.  
 
-## Project info
+---
 
-**URL**: https://lovable.dev/projects/34be3cea-998d-40fa-abc7-831c690c9089
+## 🚀 Features  
+- **Create Campaigns** – Anyone can start a fundraising campaign with a goal, description, and timeline.  
+- **Donations** – Secure, low-fee transactions using Algorand smart contracts.  
+- **Leaderboards** – Top donors ranked in real time.  
+- **Badges** – Every donor receives a digital badge for their contribution.  
+- **Bounties** – Top 5 donors of each campaign get special rewards.  
+- **Transparency** – All donation data & activity recorded on-chain for auditability.  
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 🧰 Tech Stack  
 
-**Use Lovable**
+| Layer       | Technology               |  
+|-------------|--------------------------|  
+| Frontend    | React, TypeScript, Vite |  
+| UI / Styling| Tailwind CSS, shadcn-ui |  
+| Blockchain  | Algorand smart contracts |  
+| Dev Tools   | ESLint, TSConfig, Vite config |  
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/34be3cea-998d-40fa-abc7-831c690c9089) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 📂 Repo Structure  
 
-**Use your preferred IDE**
+algo-fund-flow/
+│
+├── public/ → Static files (images, favicon, etc.)
+├── src/ → Main source code (components, pages, logic)
+├── .gitignore
+├── package.json
+├── tsconfig.json
+├── tailwind.config.ts
+└── vite.config.ts
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+yaml
+Copy code
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## 🔧 Setup  
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1. **Clone** the repo  
+   ```bash
+   git clone https://github.com/supritimishra/algo-fund-flow.git
+   cd algo-fund-flow
+Install dependencies
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+bash
+Copy code
+npm install
+Configure environment
 
-# Step 3: Install the necessary dependencies.
-npm i
+Add Algorand node / API keys if needed
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+Set any .env variables required (e.g., smart contract addresses)
+
+Run development server
+
+bash
+Copy code
 npm run dev
-```
+Then open http://localhost:3000 (or the configured port).
 
-**Edit a file directly in GitHub**
+🧪 Demo Flow
+Create a campaign → supply goal, title, description
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Donors connect wallet & donate → transaction via Algorand
 
-**Use GitHub Codespaces**
+Leaderboard updates dynamically
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Badges issued per donor for contribution
 
-## What technologies are used for this project?
+Top 5 donors automatically rewarded with bounty
 
-This project is built with:
+📈 Why Algo Fund Flow?
+💡 Motivation & Rewards – Gamification encourages giving more often.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+🔐 Decentralized & Transparent – Blockchain ensures trust and no hidden fees.
 
-## How can I deploy this project?
+🌍 Global Reach – Anyone, anywhere can donate.
 
-Simply open [Lovable](https://lovable.dev/projects/34be3cea-998d-40fa-abc7-831c690c9089) and click on Share -> Publish.
+🔁 Scalable Foundation – Future-ready: NFTs, social causes, DAO governance, etc.
 
-## Can I connect a custom domain to my Lovable project?
+👍 Contribution
+We welcome contributions! Whether it's bug fixes, new features, or UI improvements:
 
-Yes, you can!
+Fork the repo
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Create a feature branch
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+bash
+Copy code
+git checkout -b feature/my-cool-feature
+Commit your changes
+
+bash
+Copy code
+git commit -m "Add awesome feature"
+Push
+
+bash
+Copy code
+git push origin feature/my-cool-feature
+Open a Pull Request
+
+📝 License & Credits
+License: MIT (or whichever you choose)
+
+Credits:
+
+Built using Algorand
+
+UI built with Tailwind CSS & shadcn-ui
+
+
+
+✨ Thank you for checking out Algo Fund Flow!
+Let’s build a more transparent, rewarding, and decentralized crowdfunding future! 🌟
