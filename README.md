@@ -49,7 +49,7 @@ Copy code
    cd algo-fund-flow
 Install dependencies
 
-bash
+```bash
 Copy code
 npm install
 Configure environment
@@ -60,7 +60,7 @@ Set any .env variables required (e.g., smart contract addresses)
 
 Run development server
 
-bash
+```bash
 Copy code
 npm run dev
 Then open http://localhost:3000 (or the configured port).
@@ -92,17 +92,17 @@ Fork the repo
 
 Create a feature branch
 
-bash
+```bash
 Copy code
 git checkout -b feature/my-cool-feature
 Commit your changes
 
-bash
+```bash
 Copy code
 git commit -m "Add awesome feature"
 Push
 
-bash
+```bash
 Copy code
 git push origin feature/my-cool-feature
 Open a Pull Request
